@@ -33,7 +33,7 @@ class RoutingTest extends TestCase
         $this->get('/ups')
             ->assertSeeText('404 by Programmer Zaman Now');
     }
-    
+
     public function testRouteParameter()
     {
         $this->get('/products/1')
@@ -71,7 +71,7 @@ class RoutingTest extends TestCase
         $this->get('/users/khannedy')
             ->assertSeeText('User khannedy');
 
-        $this->get('/users/')
+        $this->get('/users')
             ->assertSeeText('User 404');
     }
 
@@ -83,4 +83,8 @@ class RoutingTest extends TestCase
         $this->get('/produk-redirect/12345')
             ->assertRedirect('/products/12345');
     }
+
+    
+
 }
+ 

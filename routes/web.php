@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\CookieController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\FormController;
 use App\Http\Controllers\InputController;
 use App\Http\Controllers\RedirectController;
 use App\Http\Controllers\ResponseController;
+use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -92,19 +94,23 @@ Route::post('/input/filter/only', [InputController::class, 'filterOnly']);
 Route::post('/input/filter/except', [InputController::class, 'filterExcept']);
 Route::post('/input/filter/merge', [InputController::class, 'filterMerge']);
 
-Route::post('/file/upload', [FileController::class, 'upload']);
+Route::post('/file/upload', [FileController::class, 'upload'])->withoutMiddleware([VerifyCsrfToken::class]);
 
 Route::get('/response/hello', [ResponseController::class, 'response']);
 Route::get('/response/header', [ResponseController::class, 'header']);
 
-Route::get('/response/type/view', [ResponseController::class, 'responseView']);
-Route::get('/response/type/json', [ResponseController::class, 'responseJson']);
-Route::get('/response/type/file', [ResponseController::class, 'responseFile']);
-Route::get('/response/type/download', [ResponseController::class, 'responseDownload']);
+Route::prefix('/response/type')->group(function() {
+    Route::get('/view', [ResponseController::class, 'responseView']);
+    Route::get('/json', [ResponseController::class, 'responseJson']);
+    Route::get('/file', [ResponseController::class, 'responseFile']);
+    Route::get('/download', [ResponseController::class, 'responseDownload']);
+});
 
-Route::get('/cookie/set', [CookieController::class, 'createCookie']);
-Route::get('/cookie/get', [CookieController::class, 'getCookie']);
-Route::get('/cookie/clear', [CookieController::class, 'clearCookie']);
+Route::controller(CookieController::class)->group(function(){
+    Route::get('/cookie/set', 'createCookie');
+    Route::get('/cookie/get', 'getCookie');
+    Route::get('/cookie/clear', 'clearCookie');
+});
 
 Route::get('/redirect/from', [RedirectController::class, 'redirectFrom']);
 Route::get('/redirect/to', [RedirectController::class, 'redirectTo']); 
@@ -114,3 +120,14 @@ Route::get('/redirect/name/{name}/address/{address}', [RedirectController::class
 Route::get('/redirect/action', [RedirectController::class, 'redirectAction']);
 Route::get('/redirect/away', [RedirectController::class, 'redirectAway']);
 Route::get('/redirect/current', [RedirectController::class, 'currentRoute'])->name('redirect-current');
+
+Route::get('/middleware/api', [RedirectController::class, 'redirectAction'])->middleware(['contoh']);
+Route::middleware(['contoh:FZN,401'])->group(function(){
+    Route::get('/middleware/api', [RedirectController::class, 'redirectAction']);
+});
+Route::get('/middleware/group', [RedirectController::class, 'redirectAction']
+)->middleware(['fzn' => 'contoh:FZN,401']);
+
+Route::get('/form', [FormController::class, 'form']);
+Route::post('/form', [FormController::class, 'submitForm']);
+
